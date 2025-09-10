@@ -1,21 +1,21 @@
 import { useProduct } from "../hooks/useProduct";
-import { prodducts } from "../mocks/Product.mock";
+import { mockProducts } from "../mocks/Product.mock";
+import { TableProduct } from "./TableProduct";
 
-export const ProductApp = () =>{
+export const ProductApp = () => {
+  const { products, plus, subtract, reset } = useProduct(mockProducts);
+  const head: string[] = ["Nombre", "Descripcion", "Cantidad", "Precio", "+/-", "Total"];
+  const title = "Products!";
 
-    const { products, plus, subtract, reset } = useProduct(prodducts);
+  if (products.length === 0) {
+    return <h2>No hay productos disponibles</h2>;
+  }
 
-    return (
-        <>
-        {products.map((p) => (
-            <div key={p.id}>
-            <h3>{p.name}</h3>
-            <p>Cantidad: {p.quantity}</p>
-            <button onClick={() => plus(p.id)}>➕</button>
-            <button onClick={() => subtract(p.id)}>➖</button>
-            </div>
-        ))}
-        <button onClick={reset}>🔄 Reset</button>
-        </>
-    );
-}
+  return (
+    <>
+      <h1>{title}</h1>
+      <TableProduct head={head} data={products} plus={plus} subtract={subtract} />
+      <button onClick={reset}>🔄 Reset</button>
+    </>
+  );
+};
