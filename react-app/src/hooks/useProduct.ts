@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Product } from "../interface/Product.interface";
+import { listProduct } from "../services/ProductService";
 
 export function useProduct(init: Product[] = []){
     //const [products,setProducts] = useState(init); // sin useEffect(...)
@@ -10,6 +11,8 @@ export function useProduct(init: Product[] = []){
     //2. useEffect(() => setProducts(init), [init]) → después del primer render se inicializa con init.
     //3. Si en un futuro init cambia (por ejemplo, porque viene de una API), el hook actualizará el estado.
     useEffect(() => {
+        // let dataLoad = listProduct();
+        // setProducts(dataLoad);
         setProducts(init);
     }, [init]); // simula un Postcreated
 

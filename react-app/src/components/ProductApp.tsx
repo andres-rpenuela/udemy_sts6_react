@@ -1,10 +1,10 @@
 import { useProduct } from "../hooks/useProduct";
-import { mockProducts } from "../mocks/Product.mock";
+import { listProduct } from "../services/ProductService";
 import { TableProduct } from "./TableProduct";
 
 export const ProductApp = () => {
-  const { products, plus, subtract, reset } = useProduct(mockProducts);
-  
+  const { products, plus, subtract, reset } = useProduct( listProduct() );
+
   const head: string[] = ["Nombre", "Descripcion", "Cantidad", "Precio", "+/-", "Total"];
   const title = "Products!";
 
