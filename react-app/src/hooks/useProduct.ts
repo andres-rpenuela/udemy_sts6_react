@@ -1,8 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Product } from "../interface/Product.interface";
 
 export function useProduct(init: Product[] = []){
-    const [products,setProducts] = useState(init);
+    //const [products,setProducts] = useState(init); // sin useEffect(...)
+    const [products,setProducts] = useState<Product[]>([]); // con useEffect(...)
+
+    // Se ejecuta después del primer render
+    //1. useState([]) → empieza vacío.
+    //2. useEffect(() => setProducts(init), [init]) → después del primer render se inicializa con init.
+    //3. Si en un futuro init cambia (por ejemplo, porque viene de una API), el hook actualizará el estado.
+    useEffect(() => {
+        setProducts(init);
+    }, [init]); // simula un Postcreated
 
     // Incremta la cantidad por id
     // Incrementar cantidad solo si es menor que el stock disponible

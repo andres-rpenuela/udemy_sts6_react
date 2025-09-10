@@ -4,6 +4,7 @@ import { TableProduct } from "./TableProduct";
 
 export const ProductApp = () => {
   const { products, plus, subtract, reset } = useProduct(mockProducts);
+  
   const head: string[] = ["Nombre", "Descripcion", "Cantidad", "Precio", "+/-", "Total"];
   const title = "Products!";
 
