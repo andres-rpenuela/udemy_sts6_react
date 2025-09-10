@@ -118,6 +118,114 @@ my-app/
 
 ---
 
+# PropTypes
+
 💡 **Tip:** No pongas todo en `src/` sin estructura, porque al crecer la app será difícil mantenerla. Esta estructura te permite escalar fácilmente y tener código limpio.
+
+---
+
+
+## 🔎 ¿Qué son los PropTypes?
+
+* **PropTypes** es una librería incluida en React para **validar las props en tiempo de ejecución**.
+* Se usa más en **JavaScript puro**.
+* En **TypeScript**, normalmente usamos **interfaces** o **types** para validar las props en tiempo de compilación, lo cual es más potente.
+
+```bash
+npm install prop-types
+```
+
+---
+
+## ✅ Ejemplo con PropTypes (JS)
+
+```jsx
+import PropTypes from "prop-types";
+
+function Table({ head, data }) {
+  return (
+    <table>
+      <thead>
+        <tr>
+          {head.map((h, i) => (
+            <th key={i}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((p) => (
+          <tr key={p.id}>
+            <td>{p.name}</td>
+            <td>{p.description}</td>
+            <td>{p.quantity}</td>
+            <td>{p.price}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+Table.propTypes = {
+  head: PropTypes.arrayOf(PropTypes.string).isRequired,
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      name: PropTypes.string.isRequired,
+      description: PropTypes.string,
+      quantity: PropTypes.number,
+      price: PropTypes.number,
+    })
+  ).isRequired,
+};
+
+export default Table;
+```
+
+---
+
+## ✅ El mismo ejemplo en TypeScript (sin PropTypes)
+
+Ya que tú trabajas con **TypeScript**, en lugar de `PropTypes` defines una **interfaz**:
+
+```tsx
+import type { Product } from "../interface/Product.interface";
+
+interface TableProps {
+  head: string[];
+  data: Product[];
+}
+
+export function Table({ head, data }: TableProps) {
+  return (
+    <table>
+      <thead>
+        <tr>
+          {head.map((h, i) => (
+            <th key={i}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((p) => (
+          <tr key={p.id}>
+            <td>{p.name}</td>
+            <td>{p.description}</td>
+            <td>{p.quantity}</td>
+            <td>{p.price}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+```
+
+---
+
+## 🔑 Diferencias
+
+* **PropTypes**: validación **en tiempo de ejecución** → útil en proyectos JS.
+* **TypeScript**: validación **en tiempo de compilación** → más seguro, no necesitas PropTypes.
 
 ---
