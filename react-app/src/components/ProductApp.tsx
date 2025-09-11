@@ -50,18 +50,18 @@ export const ProductApp = () => {
   }
 
   return (
-    <div>
+    <div className="container m-4">
       <h1>Products!</h1>
-      <div>
-        <div>
+      <div className="row">
+        <div className="col-4">
           <h2>{productSelected ? "Editar producto" : "Agregar producto"}</h2>
           <ProductForm
             handlerAdd={handlerAddProduct}
             productSelected={productSelected}
           />
         </div>
-        <hr />
-        <div>
+        
+        <div className="col-8">
           {products.length === 0 ? (
             <h2>No hay productos disponibles</h2>
           ) : (
@@ -75,9 +75,10 @@ export const ProductApp = () => {
                 handlerRemoveProduct={handlerRemoveProduct}
                 handlerLoadProductSelected={handlerLoadProductSelected}
               />
-              <button onClick={onReset}>🔄 Reset</button>
             </>
           )}
+          <hr/>
+          <button onClick={onReset}>🔄 Reset</button>
         </div>
       </div>
     </div>

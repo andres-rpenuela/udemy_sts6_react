@@ -18,7 +18,7 @@ export function TableProduct({
   handlerLoadProductSelected,
 }: TableProps) {
   return (
-    <table border={1} style={{ borderCollapse: "collapse", width: "100%" }}>
+    <table border={1} className="table" style={{margin: "20px auto"}}>
       <thead>
         <tr>
           {head.map((h, i) => (
