@@ -5,9 +5,9 @@ import { ProductForm } from "./ProductForm";
 import { TableProduct } from "./TableProduct";
 
 export const ProductApp = () => {
-  const { products, plus, subtract, reset, addProduct } = useProduct( listProduct() );
+  const { products, plus, subtract, reset, addProduct, deleteProduct } = useProduct( listProduct() );
 
-  const head: string[] = ["Nombre", "Descripcion", "Cantidad", "Precio", "+/-", "Total"];
+  const head: string[] = ["Nombre", "Descripcion", "Cantidad", "Precio", "+/-", "Total", "Eliminar"];
   const title = "Products!";
 
   const handlerAddProduct = (product:Product) =>{
@@ -15,9 +15,15 @@ export const ProductApp = () => {
     addProduct(product);
   }
 
-  if (products.length === 0) {
-    return <h2>No hay productos disponibles</h2>;
+  const handlerRemoveProduct = (id:number) =>{
+    if(!id )
+      return;
+
+    deleteProduct(id)
   }
+  // if (products.length === 0) {
+  //   return <h2>No hay productos disponibles</h2>;
+  // }
 
   return (
     <div>
@@ -29,9 +35,15 @@ export const ProductApp = () => {
         </div>
         <hr/>
         <div>
-          <h2>{'Listado de productos'}</h2>
-          <TableProduct head={head} data={products} plus={plus} subtract={subtract} />
-          <button onClick={reset}>🔄 Reset</button>
+          {products.length == 0 ? (
+            <h2>No hay productos disponibles</h2>
+          ):(
+            <>
+            <h2>{'Listado de productos'}</h2>
+            <TableProduct head={head} data={products} plus={plus} subtract={subtract} handlerRemoveProduct= { handlerRemoveProduct} />
+            <button onClick={reset}>🔄 Reset</button>
+            </>
+          )}
         </div>
       </div>
       

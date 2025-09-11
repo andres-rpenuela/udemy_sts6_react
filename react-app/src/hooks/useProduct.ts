@@ -50,6 +50,10 @@ export function useProduct(init: Product[] = []){
         });
     };
     
-     return { products, plus, subtract, reset, addProduct };
+    const deleteProduct = (id: number) => {
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+    };
+
+     return { products, plus, subtract, reset, addProduct, deleteProduct };
 
 }

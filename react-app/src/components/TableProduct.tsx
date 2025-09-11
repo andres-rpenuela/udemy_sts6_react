@@ -5,9 +5,16 @@ interface TableProps {
   data?: Product[];
   plus: (id: number) => void;
   subtract: (id: number) => void;
+  handlerRemoveProduct: (id: number) => void; // 👈 agregamos aquí
 }
 
-export function TableProduct({ head = [], data = [], plus, subtract }: TableProps) {
+export function TableProduct({
+  head = [],
+  data = [],
+  plus,
+  subtract,
+  handlerRemoveProduct,
+}: TableProps) {
   return (
     <table border={1} style={{ borderCollapse: "collapse", width: "100%" }}>
       <thead>
@@ -29,6 +36,9 @@ export function TableProduct({ head = [], data = [], plus, subtract }: TableProp
               <button onClick={() => subtract(p.id)} disabled={p.quantity === 0}>➖</button>
             </td>
             <td>{p.quantity * p.price}</td>
+            <td>
+              <button onClick={() => handlerRemoveProduct(p.id) }>Eliminar</button>
+            </td>
           </tr>
         ))}
       </tbody>
