@@ -2,8 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import type { Product } from "../interface/Product.interface";
 import "../css/ProductForm.css"; // 👈 Importamos el CSS
 
-export const ProductForm = () => {
-  const [product, setProduct] = useState<Product>({});
+interface ProductFormProps {
+  handlerAdd: (p: Product) => void;
+}
+
+const productEmpty = {
+    id: 0,
+    name: "",
+    price: 0,
+    stock: 0,
+    quantity: 0,
+    description: "",
+  };
+
+export const ProductForm = ({ handlerAdd }: ProductFormProps) => {
+  const [product, setProduct] = useState<Product>(productEmpty);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Inicializar con valores por defecto (solo ejemplo)
@@ -19,16 +32,29 @@ export const ProductForm = () => {
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProduct({
-      ...product,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value, type } = e.target;
+
+    setProduct((prev) => ({
+      ...prev,
+      //[e.target.name]: e.target.value,
+      [name]: type === "number" ? Number(value) : value, // 🔑 convierte números
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     //alert(`Nombre: ${inputRef.current?.value}`);
-    alert(`Producto creado: ${JSON.stringify(product)}`);
+    //alert(`Producto creado: ${JSON.stringify(product)}`);
+    
+    if(!product.name || !product.price || !product.stock ){
+        alert('Datos incompletos');
+        return;
+    }
+
+    handlerAdd( product ); // funcion recibida del padre
+
+    // Resetear el formulario a valores iniciales
+    setProduct(productEmpty);
   };
 
   return (

@@ -43,10 +43,13 @@ export function useProduct(init: Product[] = []){
     const reset = () => setProducts(init);
 
     // Aagregar un producto
-    const addProduct = (product: Product) => {
-        setProducts((prev) => [...prev, { ...product, quantity: product.quantity || 0 }]);
+    const addProduct = (product: Omit<Product, "id">) => {
+        setProducts(prev => {
+        const nextId = prev.reduce((max, p) => (p.id > max ? p.id : max), 0) + 1;
+        return [...prev, { ...product, id: nextId }];
+        });
     };
     
-     return { products, plus, subtract, reset };
+     return { products, plus, subtract, reset, addProduct };
 
 }

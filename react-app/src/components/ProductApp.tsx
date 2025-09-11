@@ -1,13 +1,19 @@
 import { useProduct } from "../hooks/useProduct";
+import type { Product } from "../interface/Product.interface";
 import { listProduct } from "../services/ProductService";
 import { ProductForm } from "./ProductForm";
 import { TableProduct } from "./TableProduct";
 
 export const ProductApp = () => {
-  const { products, plus, subtract, reset } = useProduct( listProduct() );
+  const { products, plus, subtract, reset, addProduct } = useProduct( listProduct() );
 
   const head: string[] = ["Nombre", "Descripcion", "Cantidad", "Precio", "+/-", "Total"];
   const title = "Products!";
+
+  const handlerAddProduct = (product:Product) =>{
+    console.log(product);
+    addProduct(product);
+  }
 
   if (products.length === 0) {
     return <h2>No hay productos disponibles</h2>;
@@ -19,7 +25,7 @@ export const ProductApp = () => {
       <div>
         <div>
           <h2>{'Agregar producto'}</h2>
-          <ProductForm/>
+          <ProductForm handlerAdd= {handlerAddProduct} />
         </div>
         <hr/>
         <div>
