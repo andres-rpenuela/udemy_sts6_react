@@ -6,6 +6,7 @@ interface TableProps {
   plus: (id: number) => void;
   subtract: (id: number) => void;
   handlerRemoveProduct: (id: number) => void; // 👈 agregamos aquí
+  handlerLoadProductSelected: (p:Product) => void;
 }
 
 export function TableProduct({
@@ -14,6 +15,7 @@ export function TableProduct({
   plus,
   subtract,
   handlerRemoveProduct,
+  handlerLoadProductSelected,
 }: TableProps) {
   return (
     <table border={1} style={{ borderCollapse: "collapse", width: "100%" }}>
@@ -38,6 +40,9 @@ export function TableProduct({
             <td>{p.quantity * p.price}</td>
             <td>
               <button onClick={() => handlerRemoveProduct(p.id) }>Eliminar</button>
+            </td>
+            <td>
+              <button onClick={() => handlerLoadProductSelected(p) }>Editar</button>
             </td>
           </tr>
         ))}

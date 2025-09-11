@@ -1,103 +1,106 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Product } from "../interface/Product.interface";
-import "../css/ProductForm.css"; // 👈 Importamos el CSS
+import  "../css/ProductForm.css"
 
 interface ProductFormProps {
-  handlerAdd: (p: Product) => void;
+  handlerAdd: (product: Product) => void;
+  productSelected?: Product | null; // propiedad opcional, que puede pasarse o no pasare y esta puede ser null o con valor
 }
 
-const productEmpty = {
+export const ProductForm = ({ handlerAdd, productSelected }: ProductFormProps) => {
+  const [product, setProduct] = useState<Product>({
     id: 0,
     name: "",
     price: 0,
     stock: 0,
     quantity: 0,
     description: "",
-  };
+  });
 
-export const ProductForm = ({ handlerAdd }: ProductFormProps) => {
-  const [product, setProduct] = useState<Product>(productEmpty);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Inicializar con valores por defecto (solo ejemplo)
+  // cuando cambie el producto seleccionado, actualizamos el estado
   useEffect(() => {
-    setProduct({
-        id: 0,
-        name: "",
-        price: 0,
-        stock: 0,
-        quantity: 0,
-        description: "",
-    });
-  }, []);
+    if (productSelected) {
+      setProduct(productSelected);
+    }else{
+        setProduct({
+            id: 0,
+            name: "",
+            price: 0,
+            stock: 0,
+            quantity: 0,
+            description: "",
+        });
+    }
+  }, [productSelected]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-
-    setProduct((prev) => ({
-      ...prev,
-      //[e.target.name]: e.target.value,
-      [name]: type === "number" ? Number(value) : value, // 🔑 convierte números
-    }));
+    setProduct({
+      ...product,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    //alert(`Nombre: ${inputRef.current?.value}`);
-    //alert(`Producto creado: ${JSON.stringify(product)}`);
-    
-    if(!product.name || !product.price || !product.stock ){
-        alert('Datos incompletos');
-        return;
+    if(!product.name || !product.description || !product.price || !product.stock){
+        alert("Datos incompletos!!");
+        return
     }
 
-    handlerAdd( product ); // funcion recibida del padre
-
-    // Resetear el formulario a valores iniciales
-    setProduct(productEmpty);
+    handlerAdd(product);
+    setProduct({
+      id: 0,
+      name: "",
+      price: 0,
+      stock: 0,
+      quantity: 0,
+      description: "",
+    }); // limpiar
   };
 
   return (
-    <>
-      <form className="form-container" onSubmit={handleSubmit}>
-        <h2>Agregar Producto</h2>
+    <form className="form-container" onSubmit={handleSubmit}>
+        <h2>{product.id ? "Editar Producto" : "Agregar Producto"}</h2>
 
         <input
-          placeholder="Nombre"
-          name="name"
-          value={product.name}
-          onChange={handleChange}
-          ref={inputRef}
-          className="form-input"
-        />
-        <input
-          placeholder="Descripción"
-          name="description"
-          value={product.description}
-          onChange={handleChange}
-          className="form-input"
-        />
-        <input
-          placeholder="Precio"
-          name="price"
-          type="number"
-          value={product.price}
-          onChange={handleChange}
-          className="form-input"
-        />
-        <input
-          placeholder="Stock"
-          name="stock"
-          type="number"
-          value={product.stock}
-          onChange={handleChange}
-          className="form-input"
+            className="form-input"
+            name="name"
+            value={product.name}
+            onChange={handleChange}
+            placeholder="Nombre"
         />
 
-        <button type="submit" className="form-button">Enviar</button>
-      </form>
+        <input
+            className="form-input"
+            name="description"
+            value={product.description}
+            onChange={handleChange}
+            placeholder="Descripción"
+        />
 
-      <pre className="debug-box">{JSON.stringify(product, null, 2)}</pre>
-    </>
+        <input
+            className="form-input"
+            name="price"
+            type="number"
+            value={product.price}
+            onChange={handleChange}
+            placeholder="Precio"
+        />
+
+        <input
+            className="form-input"
+            name="stock"
+            type="number"
+            value={product.stock}
+            onChange={handleChange}
+            placeholder="Stock"
+        />
+
+        <button className="form-button" type="submit">
+            {product.id ? "Actualizar" : "Agregar"}  {/* el cero se consiera false */}
+        </button>
+
+        <pre className="debug-box">{JSON.stringify(product, null, 2)}</pre>
+    </form>
   );
 };
