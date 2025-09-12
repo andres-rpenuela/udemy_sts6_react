@@ -1,0 +1,118 @@
+#version: '3.9'
+
+# Cambia el perfil en .env:
+#
+# # Para dev
+# SPRING_PROFILES_ACTIVE=dev
+#
+# # Para test
+# SPRING_PROFILES_ACTIVE=test
+#
+#
+# Levanta los contenedores:
+#
+# # Levantar dev
+# docker compose --profile dev up -d --build
+#
+# # Levantar test
+# docker compose --profile test up -d --build
+#
+#
+# Verifica los logs:
+#
+# docker logs -f springboot_container
+#
+#
+# ✅ Características incluidas
+#
+# - Dev: Hot reload con mvn spring-boot:run, código montado como volumen
+# - Prod: Ejecuta JAR precompilado, más liviano
+# - MySQL: Volúmenes separados para dev y test, persistencia de datos
+# - Perfiles: Controlados por .env y Docker Compose profiles
+# - Puertos: Dev y test pueden configurarse para no colisionar
+
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ${SPRING_PROFILES_ACTIVE}_DB_NAME
+      MYSQL_USER: ${SPRING_PROFILES_ACTIVE}_DB_USER
+      MYSQL_PASSWORD: ${SPRING_PROFILES_ACTIVE}_DB_PASSWORD
+    ports:
+      - "3307:3306"
+    volumes:
+      - ../data/${SPRING_PROFILES_ACTIVE}/var/lib/mysql:/var/lib/mysql
+    profiles:
+      - dev
+      - test
+
+  springboot-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: ${SPRING_PROFILES_ACTIVE}
+      target: final
+    container_name: springboot_container
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${SPRING_PROFILES_ACTIVE}_DB_NAME
+      SPRING_DATASOURCE_USERNAME: ${SPRING_PROFILES_ACTIVE}_DB_USER
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_PROFILES_ACTIVE}_DB_PASSWORD
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./src:/app/src       # monta código fuente desde host
+      - ./pom.xml:/app/pom.xml
+    profiles:
+      - dev
+      - test
+
+
+#  phpmyadmin:
+#    image: phpmyadmin/phpmyadmin:5.2
+#    container_name: phpmyadmin_container
+#    restart: always
+#    environment:
+#      PMA_HOST: ${SPRING_PROFILES_ACTIVE}_db       # apunta al servicio 'db'
+#      PMA_PORT: 3306
+#      PMA_USER: ${SPRING_PROFILES_ACTIVE}_user
+#      PMA_PASSWORD: ${SPRING_PROFILES_ACTIVE}_password
+#    ports:
+#      - "8081:80"        # http://localhost:8081 para acceder a phpMyAdmin
+#    depends_on:
+#      - db
+#      - dev
+
+# volumes en Docker Compose sirve para definir volúmenes “bind” locales, es decir,
+# carpetas del host (tu máquina) que se montan dentro del contenedor para persistencia de datos
+
+# - test_volume:
+#   Es el nombre interno del volumen que usarás en los servicios Docker.
+#
+# - driver: local
+#   Indica que se usa almacenamiento local del host.
+#
+#  - driver_opts
+#   - type: none → no es un sistema de archivos especial, simplemente usa la carpeta del host.
+#   - device: ./data/test/mysql → ruta de la carpeta en tu proyecto donde se guardarán los datos de MySQL.
+#   - o: bind → indica que es un bind mount, es decir, Docker monta directamente esa carpeta del host dentro del contenedor.
+volumes:
+  test_volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: ../data/test/var/lib/mysql
+      o: bind
+  dev_volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: ../data/dev/var/lib/mysql
+      o: bind
