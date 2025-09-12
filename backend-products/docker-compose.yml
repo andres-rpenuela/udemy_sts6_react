@@ -1,27 +1,23 @@
 #version: '3.9'
 
+# Aseugra tener los volumenes en el host
+# mkdir ..\data\test\var\lib\mysql
+# mkdir ..\data\dev\var\lib\mysql
+# -----------------------------
 # Cambia el perfil en .env:
-#
-# # Para dev
+# -----------------------------
+# Para dev:
 # SPRING_PROFILES_ACTIVE=dev
-#
-# # Para test
+# Para test:
 # SPRING_PROFILES_ACTIVE=test
 #
-#
 # Levanta los contenedores:
-#
-# # Levantar dev
 # docker compose --profile dev up -d --build
-#
-# # Levantar test
 # docker compose --profile test up -d --build
 #
-#
 # Verifica los logs:
-#
 # docker logs -f springboot_container
-#
+# -----------------------------
 #
 # ✅ Características incluidas
 #
@@ -31,49 +27,115 @@
 # - Perfiles: Controlados por .env y Docker Compose profiles
 # - Puertos: Dev y test pueden configurarse para no colisionar
 
+#version: '3.9'
 
 services:
-  db:
+
+  # -----------------------------
+  # MySQL Dev
+  # -----------------------------
+  db_dev:
     image: mysql:8.0
-    container_name: mysql_container
+    container_name: mysql_dev_container
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: ${SPRING_PROFILES_ACTIVE}_DB_NAME
-      MYSQL_USER: ${SPRING_PROFILES_ACTIVE}_DB_USER
-      MYSQL_PASSWORD: ${SPRING_PROFILES_ACTIVE}_DB_PASSWORD
+      MYSQL_DATABASE: ${DEV_DB_NAME}
+      MYSQL_USER: ${DEV_DB_USER}
+      MYSQL_PASSWORD: ${DEV_DB_PASSWORD}
     ports:
       - "3307:3306"
     volumes:
-      - ../data/${SPRING_PROFILES_ACTIVE}/var/lib/mysql:/var/lib/mysql
+      - dev_volume:/var/lib/mysql
     profiles:
       - dev
+
+  # -----------------------------
+  # MySQL Test
+  # -----------------------------
+  db_test:
+    image: mysql:8.0
+    container_name: mysql_test_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ${TEST_DB_NAME}
+      MYSQL_USER: ${TEST_DB_USER}
+      MYSQL_PASSWORD: ${TEST_DB_PASSWORD}
+    ports:
+      - "3308:3306"
+    volumes:
+      - test_volume:/var/lib/mysql
+    profiles:
       - test
 
+  # -----------------------------
+  # Spring Boot App para Dev
+  # -----------------------------
   springboot-app:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        ENVIRONMENT: ${SPRING_PROFILES_ACTIVE}
-      target: final
+        ENVIRONMENT: dev
+      target: dev
     container_name: springboot_container
     depends_on:
-      - db
+      - db_dev
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${SPRING_PROFILES_ACTIVE}_DB_NAME
-      SPRING_DATASOURCE_USERNAME: ${SPRING_PROFILES_ACTIVE}_DB_USER
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_PROFILES_ACTIVE}_DB_PASSWORD
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_DATASOURCE_URL: jdbc:mysql://db_dev:3306/${DEV_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DEV_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DEV_DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: dev
     ports:
       - "8082:8080"
     volumes:
-      - ./src:/app/src       # monta código fuente desde host
+      - ./src:/app/src
       - ./pom.xml:/app/pom.xml
     profiles:
       - dev
+
+  # -----------------------------
+  # Spring Boot App para Test Solo (ejecuta solo puruebas)
+  # -----------------------------
+
+  springboot-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test-only
+    container_name: springboot_test_container
+    volumes:
+      - ./src:/app/src
+      - ./pom.xml:/app/pom.xml
+    profiles:
       - test
 
+  # -----------------------------
+  # Spring Boot App para Test
+  # -----------------------------
+  springboot-app-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: test
+      target: test
+    container_name: springboot_container_test
+    depends_on:
+      - db_test
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db_test:3306/${TEST_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${TEST_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${TEST_DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: test
+    ports:
+      - "8083:8080"
+    volumes:
+      - ./src:/app/src
+      - ./pom.xml:/app/pom.xml
+    profiles:
+      - test
 
 #  phpmyadmin:
 #    image: phpmyadmin/phpmyadmin:5.2
@@ -92,7 +154,7 @@ services:
 
 # volumes en Docker Compose sirve para definir volúmenes “bind” locales, es decir,
 # carpetas del host (tu máquina) que se montan dentro del contenedor para persistencia de datos
-
+#
 # - test_volume:
 #   Es el nombre interno del volumen que usarás en los servicios Docker.
 #

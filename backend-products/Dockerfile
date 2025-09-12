@@ -1,39 +1,39 @@
-# Stage 1: Build
+# -----------------------------
+# Stage 1: Build (compila y empaqueta)
+# -----------------------------
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copiar pom.xml y bajar dependencias
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
-# Copiar código fuente
 COPY src ./src
-
-# Compilar JAR
 RUN mvn clean package -DskipTests
 
-# Stage final híbrido
-FROM eclipse-temurin:21-jdk-alpine AS final
+# -----------------------------
+# Stage 2: Runtime para test (hot reload)
+# -----------------------------
+FROM maven:3.9.9-eclipse-temurin-21 AS test
 WORKDIR /app
+COPY . .
+CMD ["mvn", "spring-boot:run"]
 
-# Argumento para definir entorno
-ARG ENVIRONMENT=test
-ENV ENVIRONMENT=${ENVIRONMENT}
-
-# Exponer puerto
-EXPOSE 8080
-
-# Copiar JAR generado (se usa solo en prod)
+# -----------------------------
+# Stage 3: Runtime para dev/prod (ejecuta JAR)
+# -----------------------------
+FROM eclipse-temurin:21-jdk-alpine AS dev
+WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
-# Volúmenes para desarrollo
-VOLUME ["/app/src", "/app/pom.xml"]
+# -----------------------------
+# Stage 4: Validación (solo ejecutar tests)
+# -----------------------------
+FROM maven:3.9.9-eclipse-temurin-21 AS test-only
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
 
-# ENTRYPOINT condicional
-CMD if [ "$ENVIRONMENT" = "test" ]; then \
-        echo "Starting in development mode..."; \
-        mvn spring-boot:run; \
-    else \
-        echo "Starting in production mode..."; \
-        java -jar /app/app.jar; \
-    fi
+# Ejecuta únicamente los tests
+CMD ["mvn", "test"]
