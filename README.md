@@ -229,3 +229,256 @@ export function Table({ head, data }: TableProps) {
 * **TypeScript**: validación **en tiempo de compilación** → más seguro, no necesitas PropTypes.
 
 ---
+
+# Consumir una **API REST* en **React** usando **Axios**
+
+## 1. Archivo `api.js` (cliente Axios centralizado)
+
+```javascript
+// src/api.js
+import axios from "axios";
+
+// URL base del backend (ajústala según tu entorno)
+const api = axios.create({
+  baseURL: "http://localhost:8082/api",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+export default api;
+```
+
+---
+
+## 2. GET (listar todos los productos)
+
+```javascript
+import React, { useEffect, useState } from "react";
+import api from "../api";
+
+const ProductList = () => {
+  const [products, setProducts] = useState([]);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get("/products");
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error al obtener productos:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  return (
+    <div>
+      <h2>Productos</h2>
+      <ul>
+        {products.map((p) => (
+          <li key={p.id}>
+            {p.name} - ${p.price}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default ProductList;
+```
+
+---
+
+## 3. POST (crear producto)
+
+```javascript
+import React, { useState } from "react";
+import api from "../api";
+
+const ProductForm = ({ onCreated }) => {
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post("/products", { name, price });
+      console.log("Producto creado:", response.data);
+      onCreated(); // refresca lista
+      setName("");
+      setPrice("");
+    } catch (error) {
+      console.error("Error al crear producto:", error);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Nombre"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+      <input
+        type="number"
+        placeholder="Precio"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+        required
+      />
+      <button type="submit">Agregar</button>
+    </form>
+  );
+};
+
+export default ProductForm;
+```
+
+---
+
+## 4. PUT (actualizar producto)
+
+```javascript
+import React, { useState } from "react";
+import api from "../api";
+
+const ProductEdit = ({ product, onUpdated }) => {
+  const [name, setName] = useState(product.name);
+  const [price, setPrice] = useState(product.price);
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.put(`/products/${product.id}`, {
+        name,
+        price,
+      });
+      console.log("Producto actualizado:", response.data);
+      onUpdated();
+    } catch (error) {
+      console.error("Error al actualizar producto:", error);
+    }
+  };
+
+  return (
+    <form onSubmit={handleUpdate}>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="number"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+      />
+      <button type="submit">Actualizar</button>
+    </form>
+  );
+};
+
+export default ProductEdit;
+```
+
+---
+
+## 5. DELETE (eliminar producto)
+
+```javascript
+import React from "react";
+import api from "../api";
+
+const DeleteButton = ({ id, onDeleted }) => {
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/products/${id}`);
+      console.log("Producto eliminado:", id);
+      onDeleted();
+    } catch (error) {
+      console.error("Error al eliminar producto:", error);
+    }
+  };
+
+  return <button onClick={handleDelete}>Eliminar</button>;
+};
+
+export default DeleteButton;
+```
+
+---
+
+## 6. Componente principal con CRUD completo
+
+```javascript
+import React, { useEffect, useState } from "react";
+import ProductForm from "./ProductForm";
+import ProductEdit from "./ProductEdit";
+import DeleteButton from "./DeleteButton";
+import api from "../api";
+
+const ProductApp = () => {
+  const [products, setProducts] = useState([]);
+  const [editing, setEditing] = useState(null);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get("/products");
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error al cargar productos:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  return (
+    <div>
+      <h1>Gestión de Productos</h1>
+
+      <ProductForm onCreated={fetchProducts} />
+
+      <ul>
+        {products.map((p) => (
+          <li key={p.id}>
+            {editing === p.id ? (
+              <ProductEdit
+                product={p}
+                onUpdated={() => {
+                  fetchProducts();
+                  setEditing(null);
+                }}
+              />
+            ) : (
+              <>
+                {p.name} - ${p.price}
+                <button onClick={() => setEditing(p.id)}>Editar</button>
+                <DeleteButton id={p.id} onDeleted={fetchProducts} />
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default ProductApp;
+```
+
+---
+
+✅ Con esto tienes:
+
+* **GET** → listar
+* **POST** → crear
+* **PUT** → actualizar
+* **DELETE** → eliminar
+
+---

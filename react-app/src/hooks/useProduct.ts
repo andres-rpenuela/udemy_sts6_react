@@ -14,7 +14,7 @@ export function useProduct(init: Product[] = []){
         // let dataLoad = listProduct();
         // setProducts(dataLoad);
         setProducts(init);
-    }, [init]); // simula un Postcreated
+    }, []); // simula un Postcreated, si esta vacio, solo se ejecuta una vez (cuando se renderiza)
 
     // Incremta la cantidad por id
     // Incrementar cantidad solo si es menor que el stock disponible
@@ -54,6 +54,7 @@ export function useProduct(init: Product[] = []){
         setProducts((prev) => prev.filter((p) => p.id !== id));
     };
 
-     return { products, plus, subtract, reset, addProduct, deleteProduct };
+    
+     return { products, plus, subtract, reset, addProduct, deleteProduct, setProducts };
 
 }

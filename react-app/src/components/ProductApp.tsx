@@ -1,12 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
 import type { Product } from "../interface/Product.interface";
-import { listProduct } from "../services/ProductService";
+import { findAll, listProduct } from "../services/ProductService";
 import { ProductForm } from "./ProductForm";
 import { TableProduct } from "./TableProduct";
 
 export const ProductApp = () => {
-  const { products, plus, subtract, reset, addProduct, deleteProduct } = useProduct(listProduct());
+  //const { products, plus, subtract, reset, addProduct, deleteProduct } = useProduct(listProduct());
+  const { products, plus, subtract, reset, addProduct, deleteProduct, setProducts} = useProduct([]);
+
+  const getProducts = async () => {
+    const result = await findAll();
+    console.log(result); //
+    const loadedProducts = result?.data._embedded?.products ?? [];
+
+    console.log(loadedProducts)
+    setProducts( loadedProducts );
+  }
+
+  useEffect( () =>{
+    getProducts()
+  },[]); // useEffect no puede ser una funciona asynconra
 
   // Estado para producto seleccionado en edición
   const [productSelected, setProductSelected] = useState<Product | null>(null);
