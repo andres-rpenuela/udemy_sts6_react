@@ -45,6 +45,7 @@ export const ProductApp = () => {
         alert("error al editar producto.")
         return;
       }
+      setProducts( products.map(p => p.id === product.id ? product:  p) );
       setProductSelected(null);
       // aquí podrías actualizarlo en `products`
     } else {
