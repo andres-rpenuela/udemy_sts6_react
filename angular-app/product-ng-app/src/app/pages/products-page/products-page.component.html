@@ -1,0 +1,26 @@
+<div class="container-fluid mt-4">
+  <div class="row mb-3">
+    <h1>{{ title }}</h1>
+  </div>
+
+  <div class="row">
+    <!-- Formulario a la izquierda -->
+    <div class="col-md-4 d-flex flex-column">
+      <product-form
+        [productModel]="productSelect()"
+        (productEmmit)="createOrUpdated($event)"
+        (resetProductModel)="removeProductSelect()"></product-form>
+      <div>
+        {{productSelect() | json}}
+      </div>
+    </div>
+
+    <!-- Lista de productos a la derecha -->
+    <div class="col-md-8 d-flex flex-column">
+      <h3>Lista de productos</h3>
+      <!-- <app-product-table></app-product-table> -->
+       <product-table [products]="products()"
+       (edit)="editProduct($event)"></product-table>
+    </div>
+  </div>
+</div>
