@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
 import type { Product } from "../interface/Product.interface";
-import { findAll, listProduct } from "../services/ProductService";
+import { create, findAll, listProduct, udapted, remove } from '../services/ProductService';
 import { ProductForm } from "./ProductForm";
 import { TableProduct } from "./TableProduct";
 
@@ -11,7 +11,7 @@ export const ProductApp = () => {
 
   const getProducts = async () => {
     const result = await findAll();
-    console.log(result); //
+    // console.log(result); // debug
     const loadedProducts = result?.data._embedded?.products ?? [];
 
     console.log(loadedProducts)
@@ -39,16 +39,29 @@ export const ProductApp = () => {
   const handlerAddProduct = (product: Product) => {
     if (product.id && product.id !== 0) {
       // 📝 Editar producto existente
-      console.log("Editar producto", product);
+      //console.log("Editar producto", product);
+      udapted(product);
+      if(!udapted){
+        alert("error al editar producto.")
+        return;
+      }
       setProductSelected(null);
       // aquí podrías actualizarlo en `products`
     } else {
       // ➕ Nuevo producto
+      if(!create(product)){
+        alert("error al crear el producto")
+        return;
+      }
       addProduct(product);
     }
   };
 
   const handlerRemoveProduct = (id: number) => {
+    if(!remove(id)){
+      alert("error al borrar el producto!")
+      return;
+    }
     deleteProduct(id);
   };
 
