@@ -1,6 +1,8 @@
 <!-- product-form.component.html -->
 <h3>{{ productModel().id ? 'Editar Producto' : 'Agregar Producto' }}</h3>
 <form [formGroup]="form" (ngSubmit)="submit()">
+  <input type="hidden" formControlName="id">
+
   <div class="mb-3">
     <label class="form-label">Nombre</label>
     <input formControlName="name" type="text" class="form-control" />

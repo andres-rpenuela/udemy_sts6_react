@@ -36,6 +36,7 @@ export class ProductFormComponent{ // implements OnChanges{
 
   constructor() {
     this.form = this.fb.group({
+      id: [0],
       name: ['', Validators.required],
       description: [''],
       price: [0, [Validators.required, Validators.min(0)]],

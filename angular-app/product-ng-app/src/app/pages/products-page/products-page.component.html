@@ -20,7 +20,8 @@
       <h3>Lista de productos</h3>
       <!-- <app-product-table></app-product-table> -->
        <product-table [products]="products()"
-       (edit)="editProduct($event)"></product-table>
+       (edit)="editProduct($event)"
+       (delete)="deleteProduct($event)"></product-table>
     </div>
   </div>
 </div>
